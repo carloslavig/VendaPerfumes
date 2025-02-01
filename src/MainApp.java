@@ -1,7 +1,6 @@
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.awt.event.ActionEvent;
 import java.io.*;
 
 public class MainApp {
@@ -57,7 +56,8 @@ public class MainApp {
         if (result == JOptionPane.OK_OPTION) {
             try {
                 double valor = Double.parseDouble(valorField.getText().trim());
-                model.addRow(new Object[]{nomeField.getText().trim(), produtoField.getText().trim(), valor, valor});
+                String valorFormatado = String.format("%.2f", valor);
+                model.addRow(new Object[]{nomeField.getText().trim(), produtoField.getText().trim(), valorFormatado, valorFormatado});
                 saveClientes();
             } catch (NumberFormatException e) {
                 JOptionPane.showMessageDialog(frame, "Valor inválido", "Erro", JOptionPane.ERROR_MESSAGE);
@@ -77,10 +77,10 @@ public class MainApp {
 
         try {
             double pagamento = Double.parseDouble(pagamentoStr.trim());
-            double restante = Double.parseDouble(model.getValueAt(selectedRow, 3).toString());
+            double restante = Double.parseDouble(model.getValueAt(selectedRow, 3).toString().replace(",", "."));
             restante -= pagamento;
             if (restante < 0) restante = 0;
-            model.setValueAt(restante, selectedRow, 3);
+            model.setValueAt(String.format("%.2f", restante), selectedRow, 3);
             saveClientes();
         } catch (NumberFormatException e) {
             JOptionPane.showMessageDialog(frame, "Valor inválido", "Erro", JOptionPane.ERROR_MESSAGE);
@@ -107,7 +107,7 @@ public class MainApp {
             while ((line = reader.readLine()) != null) {
                 String[] data = line.split(",");
                 if (data.length == 4) {
-                    model.addRow(new Object[]{data[0], data[1], Double.parseDouble(data[2]), Double.parseDouble(data[3])});
+                    model.addRow(new Object[]{data[0], data[1], String.format("%.2f", Double.parseDouble(data[2])), String.format("%.2f", Double.parseDouble(data[3]))});
                 }
             }
         } catch (IOException | NumberFormatException e) {
