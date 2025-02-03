@@ -20,24 +20,37 @@ public class MainApp {
         table = new JTable(model);
         loadClientes();
 
-        JButton addButton = new JButton("Adicionar Cliente");
-        JButton payButton = new JButton("Registrar Pagamento");
-        JButton deleteButton = new JButton("Deletar Cliente");
-        JButton saveButton = new JButton("Salvar Progresso"); // Novo botão 📝
-        JButton refreshButton = new JButton("Atualizar"); // Novo botão 🔄
+        // Criando os botões com tamanho reduzido
+        JButton addButton = new JButton("Adicionar");
+        JButton payButton = new JButton("Pagar");
+        JButton deleteButton = new JButton("Deletar");
+        JButton saveButton = new JButton("Salvar");
+        JButton refreshButton = new JButton("Atualizar");
+        JButton addValueButton = new JButton("Acréscimo"); // Novo botão 💰
+
+        // Definir tamanho reduzido para os botões
+        Dimension buttonSize = new Dimension(100, 25);
+        addButton.setPreferredSize(buttonSize);
+        payButton.setPreferredSize(buttonSize);
+        deleteButton.setPreferredSize(buttonSize);
+        saveButton.setPreferredSize(buttonSize);
+        refreshButton.setPreferredSize(buttonSize);
+        addValueButton.setPreferredSize(buttonSize);
 
         addButton.addActionListener(e -> adicionarCliente());
         payButton.addActionListener(e -> registrarPagamento());
         deleteButton.addActionListener(e -> new ClienteManager(model, table).deletarCliente(frame));
-        saveButton.addActionListener(e -> saveClientes()); // Salva os dados manualmente
-        refreshButton.addActionListener(e -> loadClientes()); // Recarrega os dados do arquivo
+        saveButton.addActionListener(e -> saveClientes());
+        refreshButton.addActionListener(e -> loadClientes());
+        addValueButton.addActionListener(e -> acrescentarValor()); // Nova funcionalidade 💰
 
         JPanel panel = new JPanel();
         panel.add(addButton);
         panel.add(payButton);
         panel.add(deleteButton);
-        panel.add(saveButton); // Adiciona botão na interface
-        panel.add(refreshButton); // Adiciona botão na interface
+        panel.add(saveButton);
+        panel.add(refreshButton);
+        panel.add(addValueButton); // Adicionando novo botão 💰
 
         frame.setLayout(new BorderLayout());
         frame.add(new JScrollPane(table), BorderLayout.CENTER);
@@ -94,6 +107,33 @@ public class MainApp {
         }
     }
 
+    private void acrescentarValor() {
+        int selectedRow = table.getSelectedRow();
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(frame, "Selecione um cliente", "Erro", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        String acrescimoStr = JOptionPane.showInputDialog("Digite o valor do acréscimo:");
+        if (acrescimoStr == null) return;
+
+        try {
+            double acrescimo = Double.parseDouble(acrescimoStr.trim());
+            double valorAtual = Double.parseDouble(model.getValueAt(selectedRow, 2).toString());
+            double restanteAtual = Double.parseDouble(model.getValueAt(selectedRow, 3).toString());
+
+            double novoValor = valorAtual + acrescimo;
+            double novoRestante = restanteAtual + acrescimo;
+
+            model.setValueAt(String.format(Locale.US, "%.2f", novoValor), selectedRow, 2);
+            model.setValueAt(String.format(Locale.US, "%.2f", novoRestante), selectedRow, 3);
+
+            saveClientes();
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(frame, "Valor inválido", "Erro", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
     private void saveClientes() {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILE_NAME))) {
             for (int i = 0; i < model.getRowCount(); i++) {
@@ -109,7 +149,7 @@ public class MainApp {
     }
 
     private void loadClientes() {
-        model.setRowCount(0); // Limpa a tabela antes de recarregar
+        model.setRowCount(0);
         try (BufferedReader reader = new BufferedReader(new FileReader(FILE_NAME))) {
             String line;
             while ((line = reader.readLine()) != null) {
