@@ -1,6 +1,7 @@
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.io.*;
+import java.util.Locale;
 
 class ClienteManager {
     private DefaultTableModel model;
@@ -18,8 +19,8 @@ class ClienteManager {
             return;
         }
 
-        double restante = Double.parseDouble(model.getValueAt(selectedRow, 3).toString().replace(",", "."));
-        int confirm = JOptionPane.showConfirmDialog(frame, "O cliente deve R$" + String.format("%.2f", restante) + ". Deseja realmente deletá-lo?", "Confirmação", JOptionPane.YES_NO_OPTION);
+        double restante = Double.parseDouble(model.getValueAt(selectedRow, 3).toString());
+        int confirm = JOptionPane.showConfirmDialog(frame, "O cliente deve R$" + String.format(Locale.US, "%.2f", restante) + ". Deseja realmente deletá-lo?", "Confirmação", JOptionPane.YES_NO_OPTION);
         if (confirm == JOptionPane.YES_OPTION) {
             model.removeRow(selectedRow);
             saveClientes();
